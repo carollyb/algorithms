@@ -11,8 +11,8 @@ export function sortedSquaredArray(array: number[]) {
     const smallerValue = array[smallerValueIdx];
     const largerValue = array[largerValueIdx];
     if (Math.abs(smallerValue) > Math.abs(largerValue)) {
-      sortedSquares[idx] - smallerValue * smallerValue;
-      smallerValueIdx;
+      sortedSquares[idx] = smallerValue * smallerValue;
+      smallerValueIdx++;
     } else {
       sortedSquares[idx] = largerValue * largerValue;
       largerValueIdx--;
