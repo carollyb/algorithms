@@ -27,16 +27,16 @@ export function bubbleSort2(array: number[]) {
   while (!isSorted) {
     isSorted = true;
     let hadSwaps = noOfSwaps;
-    for (let i = 0; i < array.length - 1; i++) {
+    for (let i = 0; i < array.length - 1 - noOfSwaps; i++) {
       let next = array[i + 1];
       let current = array[i];
       if (current > next) {
         array[i + 1] = current;
         array[i] = next;
-        noOfSwaps++;
         isSorted = false;
       }
     }
+    noOfSwaps++;
   }
   return array;
 }
