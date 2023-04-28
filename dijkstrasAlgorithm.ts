@@ -27,7 +27,6 @@ export function dijkstrasAlgorithm(start: number, edges: number[][][]) {
     visited.add(vertex);
     for (const edge of edges[vertex]) {
       let [destination, distance] = edge;
-      //desestrutura os edges. se o vertice de destino estiver em visitado, continua o loop
       if (visited.has(destination)) {
         continue;
       }
@@ -54,4 +53,102 @@ function getVertexWithMinDistance(distances: number[], visited: Set<number>) {
     }
   }
   return [vertex, currentMinDistance];
+}
+//segunda opção usando heap:
+export function dijkstrasAlgorithm2(start: number, edges: number[][][]) {
+  let numberOfVertices = edges.length;
+  let minDistances = new Array(numberOfVertices).fill(Infinity);
+  let initialDistances: [number, number][] = Array.from(
+    { length: edges.length },
+    (_, i) => [i, Infinity]
+  );
+  minDistances[start] = 0;
+  const minDistancesHeap = new MinHeap(initialDistances);
+  minDistancesHeap.update(start, 0);
+  while (!minDistancesHeap.isEmpty()) {
+    const [vertex, currentMinDistance] = minDistancesHeap.remove()!;
+    if (currentMinDistance === Infinity) {
+      break;
+    }
+    for (const edge of edges[vertex]) {
+      let [destination, distance] = edge;
+      const newPathtoDistance = currentMinDistance + distance;
+      const currentDestinationDistance = minDistances[destination];
+      if (newPathtoDistance < currentDestinationDistance) {
+        minDistances[destination] = newPathtoDistance;
+        minDistancesHeap.update(destination, newPathtoDistance);
+      }
+    }
+  }
+  return minDistances.map((x) => (x === Infinity ? -1 : x));
+}
+class MinHeap {
+  vertexMap: { [vertex: number]: number };
+  heap: number[];
+
+  constructor(array: number[]) {
+    this.heap = this.buildHeap(array);
+  }
+
+  buildHeap(array: number[]) {
+    let firstParentIdx = Math.floor((array.length - 2) / 2);
+    for (let i = firstParentIdx; i >= 0; i--) {
+      this.siftDown(i, array.length - 1, array);
+    }
+    return array;
+  }
+
+  siftDown(currentIdx: number, endIdx: number, heap: number[]) {
+    let childOneIdx = currentIdx * 2 + 1;
+    while (childOneIdx <= endIdx) {
+      let childTwoIdx: number;
+      let idxToSwap: number;
+      currentIdx * 2 + 2 <= endIdx
+        ? (childTwoIdx = currentIdx * 2 + 2)
+        : (childTwoIdx = -1);
+      if (childTwoIdx !== -1 && heap[childTwoIdx] < heap[childOneIdx]) {
+        idxToSwap = childTwoIdx;
+      } else {
+        idxToSwap = childOneIdx;
+      }
+      if (heap[idxToSwap] < heap[currentIdx]) {
+        this.swap(currentIdx, idxToSwap, heap);
+        currentIdx = idxToSwap;
+        childOneIdx = currentIdx * 2 + 1;
+      } else {
+        return;
+      }
+    }
+  }
+
+  siftUp(currentIdx: number, heap: number[]) {
+    let parentIdx = Math.floor((currentIdx - 1) / 2);
+    while (currentIdx > 0 && heap[currentIdx] < heap[parentIdx]) {
+      this.swap(currentIdx, parentIdx, heap);
+      currentIdx = parentIdx;
+      parentIdx = Math.floor((currentIdx - 1) / 2);
+    }
+  }
+
+  peek() {
+    return this.heap[0];
+  }
+
+  remove() {
+    this.swap(0, this.heap.length - 1, this.heap);
+    const valueToRemove = this.heap.pop();
+    this.siftDown(0, this.heap.length - 1, this.heap);
+    return valueToRemove;
+  }
+
+  insert(value: number) {
+    this.heap.push(value);
+    this.siftUp(this.heap.length - 1, this.heap);
+  }
+
+  swap(i: number, j: number, heap: number[]) {
+    const valueToReplace = heap[j];
+    heap[j] = heap[i];
+    heap[i] = valueToReplace;
+  }
 }
